@@ -1,81 +1,86 @@
-# Zabbix-Host-Creation-via-Ansible-and-Python-API
+📘 Zabbix Automation via Ansible
+This repository contains two Ansible playbooks to automate interactions with a Zabbix server:
 
+Test Zabbix API Connectivity
 
----
+Create a Zabbix Host via Python Zabbix API
 
-# 📘 Zabbix Host Creation via Ansible and Python API
+📂 Playbooks Overview
+🔹 test_zabbix_connection.yml
+This playbook checks:
 
-This Ansible playbook connects to the Zabbix API and creates a new host using a Python one-liner script. It installs the required `zabbix-api` Python library and communicates with the Zabbix server to register a host with specified parameters.
+If the Zabbix web interface is reachable
 
----
+If the API is accessible and authentication is successful
 
-## 🚀 Features
+Use Case: Quickly verify if the Zabbix server is online and your API credentials work.
 
-- Installs the `zabbix-api` Python module
-- Authenticates with the Zabbix server
-- Creates a new host with defined IP, port, and group
-- Outputs the response from the Zabbix API
+🔹 create_zabbix_host.yml
+This playbook:
 
----
+Installs the zabbix-api Python package (if not already installed)
 
-## 🛠️ Requirements
+Authenticates with the Zabbix API
 
-- Python 3
-- Ansible
-- Zabbix server with API access enabled
-- Valid Zabbix Admin credentials
+Creates a new host with predefined settings (host name, IP, group, etc.)
 
----
+Use Case: Automate the creation of new Zabbix hosts from Ansible.
 
-## 📄 Playbook Overview
+⚙️ Requirements
+Python 3
 
-```yaml
-- Installs zabbix-api Python library
-- Runs a Python one-liner script to:
-  - Connect to Zabbix API
-  - Authenticate
-  - Create a host
-- Displays the API response
-```
+Ansible
 
----
+Zabbix server with API access enabled
 
-## ⚙️ Configuration
+Internet access to install Python packages
 
-Update the following values in the playbook:
-- `http://zabbix-url/zabbix` → Your Zabbix server URL
-- `'Admin'` and `'ur password'` → Zabbix credentials
-- `'192.168.1.1'` → IP of the host to be created
-- `'groupid': '2'` → ID of the host group (check in Zabbix UI)
+Valid Zabbix credentials
 
----
+🔐 Variables
+Set these in the playbooks:
 
-## ▶️ Usage
+yaml
+Copy
+Edit
+zabbix_url: "http://your-zabbix-url/zabbix"
+zabbix_user: "Admin"
+zabbix_password: "--your-password--"
+▶️ Usage
+1. Test Zabbix API Connection
+----
+Copy
+Edit
+ansible-playbook test_zabbix_connection.yml
+Sample Output:
 
-```bash
+----
+Copy
+Edit
+Zabbix web interface is reachable
+Successfully connected to Zabbix API
+2. Create Host in Zabbix
+----
+Copy
+Edit
 ansible-playbook create_zabbix_host.yml
-```
+Sample Output:
 
----
-
-## ✅ Output Example
-
-```json
+json
+Copy
+Edit
 ok: [localhost] => {
     "zabbix_result.stdout": "{'hostids': ['10489']}"
 }
-```
+📎 Notes
+groupid: '2' in host creation typically maps to Linux servers in Zabbix. Adjust as needed.
 
----
+Avoid hardcoding credentials for production. Use Ansible Vault or environment variables.
 
-## 🔐 Security Note
+The Python-based playbook uses a command module with inline Python. For complex logic, consider external .py scripts.
 
-Do not hardcode credentials in production environments. Use **Ansible Vault** or environment variables for secure handling of secrets.
+🧾 License
+This project is licensed under the MIT License.
 
----
-
-## 📎 License
-
-This project is open-source and available under the [MIT License](LICENSE).
 
 Any doubts ping me in anithadamarla0313@gmail.com
