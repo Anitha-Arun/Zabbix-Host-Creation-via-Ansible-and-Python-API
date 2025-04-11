@@ -1,0 +1,35 @@
+---
+- name: Zabbix API Connection
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Connect to Zabbix API using Python
+      pip:
+        name: zabbix-api
+        state: present
+
+    - name: Create host using Zabbix API
+      command: python3 -c "
+        from zabbix_api import ZabbixAPI
+        zapi = ZabbixAPI('http://zabbix-url/zabbix')
+        zapi.login('Admin', 'ur password')
+        host = {
+            'host': 'TestServer',
+            'groups': [{'groupid': '2'}],
+            'interfaces': [{
+                'type': 1,
+                'main': 1,
+                'useip': 1,
+                'ip': '192.168.1.1',
+                'dns': '',
+                'port': '10050'
+            }]
+        }
+        print(zapi.host.create(host))
+        "
+      register: zabbix_result
+
+    - name: Display Result
+      debug:
+        var: zabbix_result.stdout

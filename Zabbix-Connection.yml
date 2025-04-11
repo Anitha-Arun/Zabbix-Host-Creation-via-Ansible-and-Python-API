@@ -1,0 +1,80 @@
+---
+# Name of the playbook - describes what this playbook does
+- name: Test Zabbix Connection
+  # Specifies where to run this playbook - in this case on the local machine
+  hosts: localhost
+  # Don't collect system information since we don't need it
+  gather_facts: false
+  
+  # Define variables that will be used in the playbook
+  vars:
+    # The URL of your Zabbix server
+    zabbix_url: "http://zabbix-url/zabbix"
+    # Zabbix login credentials
+    zabbix_user: "Admin"
+    zabbix_password: "--ur password"
+
+  # List of tasks to execute
+  tasks:
+    # Task 1: Check if we can reach the Zabbix web interface
+    - name: Check if Zabbix web interface is reachable
+      # Use the uri module to make an HTTP request
+      uri:
+        # The URL to check
+        url: "{{ zabbix_url }}"
+        # Use GET method to fetch the page
+        method: GET
+        # Expected HTTP status code for success
+        status_code: 200
+      # Store the result in a variable called web_check
+      register: web_check
+      # Continue even if this task fails
+      ignore_errors: yes
+
+    # Task 2: Show if the web interface is reachable
+    - name: Display web interface status
+      # Use debug module to print message
+      debug:
+        # Use conditional to show appropriate message
+        msg: "Zabbix web interface is {{ 'reachable' if web_check.status == 200 else 'not reachable' }}"
+
+    # Task 3: Test if we can authenticate with the Zabbix API
+    - name: Test Zabbix API authentication
+      uri:
+        # API endpoint URL
+        url: "{{ zabbix_url }}/api_jsonrpc.php"
+        # Use POST for API calls
+        method: POST
+        # Specify we're sending JSON data
+        body_format: json
+        # The JSON-RPC request body
+        body:
+          # JSON-RPC version
+          jsonrpc: "2.0"
+          # API method to call
+          method: "user.login"
+          # Parameters for the method
+          params:
+            user: "{{ zabbix_user }}"
+            password: "{{ zabbix_password }}"
+          # Request ID
+          id: 1
+        # Accept both 200 and 201 as success codes
+        status_code: [200, 201]
+        # Include the response content in results
+        return_content: yes
+      # Store the result in auth_test variable
+      register: auth_test
+      # Continue even if this task fails
+      ignore_errors: yes
+
+    # Task 4: Show the final connection status
+    - name: Display connection status
+      debug:
+        # Use Jinja2 template to format the message
+        msg: >-
+          {%- if auth_test.status is defined and auth_test.status == 200 -%}
+          Successfully connected to Zabbix API
+          {%- else -%}
+          Failed to connect to Zabbix API
+          {%- endif -%}
